@@ -155,6 +155,16 @@ const calculateExtraMasterworkedStats = (
 	return extraMasterworkedStats;
 };
 
+// TODO: This isn't taking into consideration the possibility that the user
+// Does not have a masterworked class item
+const getClassItemText = (item: ResultsTableLoadout): string => {
+	const artificeArmorItems = item.armorItems.filter((x) => x.isArtifice);
+	if (artificeArmorItems.length < item.requiredArtificeStatModsIdList.length) {
+		return 'Any Masterworked Artifice Class Item';
+	}
+	return 'Any Masterworked Class Item';
+};
+
 function ResultsItem({
 	item,
 	destinyClassId,
@@ -195,9 +205,6 @@ function ResultsItem({
 		}
 	});
 
-	// 	const artificeArmorStatModArmorStatMappings: Partial<
-	// 	Record<EArmorStatId, { armorStatMapping: ArmorStatMapping; count: number }>
-	// > = {};
 	const artificeModCounts: Partial<Record<EArmorStatId, number>> = {};
 	item.requiredArtificeStatModsIdList.forEach((id) => {
 		if (!artificeModCounts[id]) {
@@ -206,20 +213,6 @@ function ResultsItem({
 			artificeModCounts[id] += 1;
 		}
 	});
-	// Object.keys(artificeModCounts).forEach((armorStatId: EArmorStatId) => {
-	// 	const artificeStatModIds: EArmorStatId[] = [];
-	// 	const count = artificeModCounts[armorStatId];
-	// 	for (let i = 0; i < count; i++) {
-	// 		artificeStatModIds.push(armorStatId);
-	// 		artificeArmorStatModArmorStatMappings[armorStatId] = {
-	// 			count,
-	// 			armorStatMapping: getArmorStatMappingFromMods(
-	// 				artificeStatModIds,
-	// 				destinyClassId
-	// 			),
-	// 		};
-	// 	}
-	// });
 
 	const getExtraMasterworkedStatsBreakdown = () => {
 		const extraMasterworkedStats = calculateExtraMasterworkedStats(
@@ -269,10 +262,8 @@ function ResultsItem({
 						height={'40px'}
 						src={getArmorSlot(EArmorSlotId.ClassItem).icon}
 					/>
-					{/* TODO: Pull this out into a function */}
-					<IconText>{`Any Masterworked${
-						item.requiredArtificeStatModsIdList.length === 4 ? ' Artifice' : ''
-					} Class Item`}</IconText>
+					{/* TODO: Pull this out into a function. Also this > 0 logic is just wrong. */}
+					<IconText>{getClassItemText(item)}</IconText>
 				</IconTextContainer>
 			</ResultsSection>
 			<ResultsSection>
@@ -327,17 +318,6 @@ function ResultsItem({
 					})}
 				</ResultsSection>
 			)}
-			{/* <ResultsSection>
-				<Title>Metadata</Title>
-				{SortableFieldsDisplayOrder.map((sortableFieldKey) => {
-					return (
-						<Box key={sortableFieldKey}>
-							{getSortableFieldDisplayName(sortableFieldKey)}:{' '}
-							{item.sortableFields[sortableFieldKey]}
-						</Box>
-					);
-				})}
-			</ResultsSection> */}
 			<ResultsSection fullWidth>
 				<Box sx={{ flexBasis: '100%' }}>
 					<Button
@@ -431,11 +411,7 @@ function ResultsItem({
 									</StatsBreakdownItem>
 								))}
 								<StatsBreakdownItem>
-									<Description>{`Any Masterworked${
-										item.requiredArtificeStatModsIdList.length === 4
-											? ' Artifice'
-											: ''
-									} Class Item`}</Description>
+									<Description>{getClassItemText(item)}</Description>
 								</StatsBreakdownItem>
 							</StatsBreakdown>
 						)}
@@ -502,14 +478,11 @@ function ResultsItem({
 							}
 						)}
 						{Object.keys(armorSlotModArmorStatMappping).map((modId) => {
+							const { name, icon } = getMod(modId as EModId);
 							return (
 								<StatsBreakdown key={modId} className="stats-breakdown">
 									<StatsBreakdownItem>
-										<BungieImage
-											width={20}
-											height={20}
-											src={getMod(modId as EModId).icon}
-										/>
+										<BungieImage width={20} height={20} src={icon} />
 									</StatsBreakdownItem>
 									{ArmorStatIdList.map((armorStatId) => (
 										<StatsBreakdownItem
@@ -519,10 +492,13 @@ function ResultsItem({
 											{armorSlotModArmorStatMappping[modId][armorStatId]}
 										</StatsBreakdownItem>
 									))}
+									<StatsBreakdownItem>
+										{/* TODO: This doesnt have the counts! */}
+										<Description>{name}</Description>
+									</StatsBreakdownItem>
 								</StatsBreakdown>
 							);
 						})}
-
 						{Object.keys(artificeModCounts).map((artificeArmorStatId) => {
 							const { name, icon } = getArmorStat(
 								artificeArmorStatId as EArmorStatId
