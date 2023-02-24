@@ -28,6 +28,7 @@ import {
 import { CheckCircleRounded } from '@mui/icons-material';
 import { Box, styled, Card, CircularProgress } from '@mui/material';
 import { useRouter } from 'next/router';
+import { Image } from 'next';
 import { useState, useEffect } from 'react';
 import {
 	selectDesiredArmorStats,
@@ -71,6 +72,8 @@ import selectedMinimumArtificeExtrapolationStatTierSlice, {
 	selectSelectedMinimumArtificeExtrapolationStatTier,
 	setSelectedMinimumArtificeExtrapolationStatTier,
 } from '@dlb/redux/features/selectedMinimumArtificeExtrapolationStatTier/selectedMinimumArtificeExtrapolationStatTierSlice';
+
+import duckImg from '@dlb/public/duck.gif';
 
 const Container = styled(Card)(({ theme }) => ({
 	color: theme.palette.secondary.main,
@@ -315,6 +318,15 @@ function Loading() {
 
 	return (
 		<>
+			<img
+				style={{
+					margin: '0 auto',
+					width: '50vw',
+					height: '50vh',
+				}}
+				src="https://i.imgur.com/X4i5JE5.gif"
+				alt="duck!!"
+			/>
 			<Container>
 				{items.map(([name, loaded], i) => (
 					<Item key={name}>
